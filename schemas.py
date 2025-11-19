@@ -12,9 +12,7 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
-
-# Example schemas (replace with your own):
+from typing import Optional, List, Dict
 
 class User(BaseModel):
     """
@@ -32,17 +30,25 @@ class Product(BaseModel):
     Products collection schema
     Collection name: "product" (lowercase of class name)
     """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
+    title: str = Field(..., description="Product name")
+    description: Optional[str] = Field(None, description="Marketing description")
+    category: str = Field(..., description="Category e.g. chair, mat")
+    images: List[str] = Field(default_factory=list, description="Image URLs")
+    specs: Dict[str, str] = Field(default_factory=dict, description="Key-value specs")
+    tags: List[str] = Field(default_factory=list, description="Searchable tags")
+    price_from: Optional[float] = Field(None, ge=0, description="Optional starting price for reference")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class QuoteRequest(BaseModel):
+    """
+    Quote requests from prospects
+    Collection name: "quoterequest"
+    """
+    product_id: Optional[str] = Field(None, description="ID of product of interest")
+    product_title: Optional[str] = Field(None, description="Fallback product title if ID not provided")
+    name: str = Field(..., description="Contact name")
+    company: Optional[str] = Field(None, description="Company name")
+    email: str = Field(..., description="Contact email")
+    phone: Optional[str] = Field(None, description="Phone number")
+    quantity: Optional[int] = Field(1, ge=1, description="Estimated quantity")
+    message: Optional[str] = Field(None, description="Additional notes or requirements")
